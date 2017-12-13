@@ -31,13 +31,23 @@ while hasFrame(vid_read_obj)
     crop_gry = rgb2gray(crop);
     crop_guass = imgaussfilt(crop_gry, 7.0);
     crop_bw = edge(crop_guass,'canny');
-    %imshow(crop_bw)
-    contours = imcontour(crop_bw);
-    props = regionprops(crop_bw,'Centroid');
-    centroids = cat(1,props.Centroid);
+    imshow(crop_bw)
+    
+
+    
+    %props = regionprops(crop_bw,'Centroid');
+    props = regionprops('table',crop_bw,'Centroid','MajorAxisLength','MinorAxisLength');
+    %contours = imcontour(crop_bw);
+    centers = props.Centroid;
+    diameters = mean([props.MajorAxisLength props.MinorAxisLength],2);
+    radii = diameters/2;
+    %centroids = cat(1,props.Centroid);
     %imshow(crop_bw)
     hold on;
-    plot(centroids(:,1),centroids(:,2),'b*')
+    %plot(centroids(:,1),centroids(:,2),'b*')
+    hold on
+    viscircles(centers,radii);
+    hold off
 
     
     

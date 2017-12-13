@@ -1,4 +1,4 @@
-% Load in video
+%% Load in video
 
 video_filename = uigetfile('*.*')
 
@@ -20,6 +20,7 @@ imshow(frame)
 %h = msgbox('Specify Points to Crop out and hit ENTER')
 
 
+%% Parse video, edge detect, contour, calculate joint angles
 
 while hasFrame(vid_read_obj)
     
@@ -28,10 +29,15 @@ while hasFrame(vid_read_obj)
     frame = flipdim(frame,1);
     crop = imcrop(frame,[x(1),y(1),x(2)-x(1),y(2)-y(1)]);
     crop_gry = rgb2gray(crop);
-    crop_guass = imgaussfilt(crop_gry, 10.0);
+    crop_guass = imgaussfilt(crop_gry, 7.0);
     crop_bw = edge(crop_guass,'canny');
     %imshow(crop_bw)
     contours = imcontour(crop_bw);
+    props = regionprops(crop_bw,'Centroid');
+    centroids = cat(1,props.Centroid);
+    %imshow(crop_bw)
+    hold on;
+    plot(centroids(:,1),centroids(:,2),'b*')
 
     
     

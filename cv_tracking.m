@@ -1,7 +1,11 @@
 %% Load in video
 
+
+% File dialog to get video address
 video_filename = uigetfile('*.*')
 
+
+% Start videoreader object
 if ( length(video_filename) > 0)
     vid_read_obj = VideoReader(video_filename)
     
@@ -18,28 +22,27 @@ fig = figure;
 imshow(frame)
 [x,y] = getpts(fig)
 
-%For vid 120811
-%x = [303.0000; 405.0000];
-%y = [95.0000; 161.0000];
-
-%h = msgbox('Specify Points to Crop out and hit ENTER')
 
 
-%% Parse video, edge detect, contour, calculate joint angles
 
+%% Parse video and run prep, edges, kinematics
 
-%Frame, J1 Pose, J2 Pose, J3Pose
 numbers = [];
 frame_number = 0;
 
+
+% Frame by Frame analysis
 while hasFrame(vid_read_obj)
     frame_number = frame_number + 1;
     frame = readFrame(vid_read_obj);
     frame = flipdim(frame,2);
     frame = flipdim(frame,1);
+    % Crop to ROI
     crop = imcrop(frame,[x(1),y(1),x(2)-x(1),y(2)-y(1)]);
+    % GrayScale, run through Guassian Filter
     crop_gry = rgb2gray(crop);
     crop_guass = imgaussfilt(crop_gry, 7.0);
+    % Canny Edge Detection
     crop_bw = edge(crop_guass,'canny');
     
     
@@ -54,9 +57,9 @@ while hasFrame(vid_read_obj)
     crop_bw = imfill(crop_bw,'holes');
     
     imshow(crop_gry)
-    
+    % Gather properties and Centroids
     props = regionprops('table',crop_bw,'Centroid','MajorAxisLength','MinorAxisLength');
-    %stats = regionprops(crop_bw,'Area','Centroid');
+
     %contours = imcontour(crop_bw);
     centers = props.Centroid;
     diameters = mean([props.MajorAxisLength props.MinorAxisLength],2);
@@ -110,7 +113,7 @@ while hasFrame(vid_read_obj)
     
 end
 
-
+% Finiky Graphing of numbers, no filtering of data. Post analysis in terminal using smooth() is good enough
 fig2 = figure;
 plot(numbers(:,1), numbers(:,2))
 
@@ -121,15 +124,3 @@ plot(((numbers(:,1)/100)*10000),numbers(:,2))
 
 
 save('numbers.mat','numbers')
-
-
-
-
-% While loop to go over each frame for the length of the video
-
-
-
-% In loop, you will crop the frame to ROI, and then threshold out the
-% markers
-
-% Crunch angles and save to a matrix [frame_number joint_angle]
